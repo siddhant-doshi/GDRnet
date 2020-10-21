@@ -790,15 +790,8 @@ class SIGN(nn.Module):
     self.combine1 = nn.Linear(decoder_dim*r,decoder_dim)
     self.layer8 = nn.Linear(decoder_dim,decoder_dim)
     self.layer9 = nn.Linear(decoder_dim,decoder_dim)
-
-  def norm_scorer(self,t,batch):
-    self.t_new = torch.empty(len(batch)).to(device)
-    for i in range(len(batch)):
-      #print (i,batch[i,0].item(),batch[i,1].item())
-      self.t_new[i] = torch.norm(self.layer8(t[batch[i,0].item()])-self.layer9(t[batch[i,1].item()]))**2
-    return self.t_new
   
-  def decagon_decoder(self,t,batch): #decagon
+  def decoder(self,t,batch):
     self.t_new = torch.empty(len(batch)).to(device)
     for i in range(len(batch)):
       self.c = torch.dot(t[batch[i,0].item()],self.layer8(t[batch[i,1].item()])).to(device) #+torch.dot(t[batch[i,1].item()],self.layer9(t[batch[i,0].item()]))).to(device)
@@ -811,7 +804,7 @@ class SIGN(nn.Module):
     t3 = tanh(self.theta2(a2x))
     c = torch.cat((t1,t2,t3),dim=1)
     c = L_Relu(self.combine1(c))
-    t1 = self.decagon_decoder(c,batch)
+    t1 = self.decoder(c,batch)
     return c,t1
 
 class Seq_GNN(nn.Module):
@@ -822,14 +815,8 @@ class Seq_GNN(nn.Module):
     self.layer1 = GATConv(d,320,1,allow_zero_in_degree=True)
     self.layer2 = GATConv(320,decoder_dim,1,allow_zero_in_degree=True)
     self.layer8 = nn.Linear(decoder_dim,decoder_dim)
-  
-  def norm_scorer(self,t,batch):
-    self.t_new = torch.empty(len(batch)).to(device)
-    for i in range(len(batch)):
-      self.t_new[i] = torch.norm(self.layer8(t[batch[i,0].item()])-self.layer9(t[batch[i,1].item()]))**2
-    return self.t_new  
-  
-  def decagon_decoder(self,t,batch): #decagon
+	
+  def decoder(self,t,batch):
     self.t_new = torch.empty(len(batch)).to(device)
     for i in range(len(batch)):
       self.c = torch.dot(t[batch[i,0].item()],self.layer8(t[batch[i,1].item()])).to(device) #+torch.dot(t[batch[i,1].item()],self.layer9(t[batch[i,0].item()]))).to(device)
@@ -839,7 +826,7 @@ class Seq_GNN(nn.Module):
   def forward(self,g,X,batch):
     c = L_Relu(self.layer1(g,X))
     c = L_Relu(self.layer2(g,c.squeeze()))
-    t1 = self.decagon_decoder(c.squeeze(),batch)
+    t1 = self.decoder(c.squeeze(),batch)
     return c.squeeze(),t1
 
 neg,pos=0,0
