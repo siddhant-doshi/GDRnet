@@ -697,10 +697,11 @@ def count_parameters(model):
   return total_params
 
 #--------------------------------Declarations----------------------------------#
-
+#--------- Get these 3 files from DRKG database, and give the path
 relations_list_file = "relations.tsv"
 entity_list_file = "entities.tsv"
 triplets_file = "drkg.tsv"
+#----------
 covid_disease_file = "Covid_disease_list.xlsx"
 wb = openpyxl.load_workbook(covid_disease_file).active
 covid_disease_list = [wb.cell(row=i,column=1).value for i in range(1,wb.max_row+1)]
@@ -783,17 +784,10 @@ class SIGN(nn.Module):
     decoder_dim = 250
     input_dim = 400
     r = 3
-    self.theta0 = nn.Linear(input_dim,decoder_dim)
-    #self.theta0_1 = nn.Linear(250,decoder_dim) 
-    #self.theta0_2 = nn.Linear(150,decoder_dim)  
+    self.theta0 = nn.Linear(input_dim,decoder_dim) 
     self.theta1 = nn.Linear(input_dim,decoder_dim)
-    #self.theta1_1 = nn.Linear(250,decoder_dim) 
-    #self.theta1_2 = nn.Linear(150,decoder_dim) 
     self.theta2 = nn.Linear(input_dim,decoder_dim)
-    #self.theta2_1 = nn.Linear(250,decoder_dim)
-    #self.theta2_2 = nn.Linear(150,decoder_dim)  
     self.combine1 = nn.Linear(decoder_dim*r,decoder_dim)
-    #self.r = nn.Linear(decoder_dim,decoder_dim//2)
     self.layer8 = nn.Linear(decoder_dim,decoder_dim)
     self.layer9 = nn.Linear(decoder_dim,decoder_dim)
 
@@ -813,18 +807,10 @@ class SIGN(nn.Module):
 
   def forward(self,X,ax,a2x,batch):
     t1 = tanh(self.theta0(X))
-    #t1 = L_Relu(self.theta0_1(t1))
-    #t1 = L_Relu(self.theta0_2(t1))
     t2 = tanh(self.theta1(ax))
-    #t2 = L_Relu(self.theta1_1(t2))
-    #t2 = L_Relu(self.theta1_2(t2))
     t3 = tanh(self.theta2(a2x))
-    #t3 = L_Relu(self.theta2_1(t3))
-    #t3 = L_Relu(self.theta2_2(t3))
     c = torch.cat((t1,t2,t3),dim=1)
     c = L_Relu(self.combine1(c))
-    #c = L_Relu(self.r(c))
-    #t1 = self.norm_scorer(c,batch)
     t1 = self.decagon_decoder(c,batch)
     return c,t1
 
@@ -925,6 +911,7 @@ plt.plot(range(len(training_acc)),training_acc)
 save_variable(F1_scores,model_directory+"F1_scores.p")
 save_variable(training_acc,model_directory+"training_acc.p")
 
+#----------Evaluation--------------------------
 #testing_acc_BCE
 net.eval()
 embed,logits = net(ax.to(device),a2x.to(device),input_features.to(device),testing_links.to(device)) #for sign
@@ -959,11 +946,12 @@ fig1.savefig("svg_comparison.svg",dpi = 500)
 save_model(net,"SIGN_Models/Model_9/model_decagon_512_2lac_4060_tanh_1")
 save_variable(embed.detach().to('cpu'),model_directory+"embed.p")
 
-#----------------loading the pre trained model-------------
+#----------------loading the pre trained model------------- 
+# The detailed discussion on how to use our model to predict the drugs for a disease is given in other file
 model_directory = 'SIGN_Models/Model_7/'
 graph = load_variable(model_directory+"Data/graph.p")
-input_features = load_variable(model_directory+"Data/input_features.p")
-nodes_mapping = load_variable(model_directory+"Data/nodes_mapping.p")
+input_features = load_variable(model_directory+"Data/input_features.p") #give in a path of input_features
+nodes_mapping = load_variable(model_directory+"Data/nodes_mapping.p") #path for nodes_mapping
 #we can get the ax and a2x from inp feat -- load A_tilda
 model_directory = 'SIGN_Models/Model_9/'
 empty_model = SIGN()
@@ -1079,6 +1067,7 @@ for link in training_links1:
 print (len(training_dis))
 training_dis = list(training_dis)
 
+#getting ranks for of the drugs on the testing diseases-----------------
 testing_diseases = [12419,40093,24354,34794,590,9611,20473,13324,24153,2008,10292,23186,37549,35522,25773,9934,12741,33207,40770]
 testing_diseases = [get_node_name(i) for i in testing_diseases]
 print (len(testing_diseases))
@@ -1107,6 +1096,7 @@ else:
   print ("Cefotaxime",get_rank(dictionaries_sign[-3],"Cefotaxime"),sep = "--")
   print ("Decitabine",get_rank(dictionaries_sign[-2],"Decitabine"),sep = "--")
 
+#Performance (ranks) check on the trained diseases as well	
 wb = openpyxl.Workbook()
 wb.save("Model_Performance_1.xlsx")
 for j in range(0,75):
@@ -1137,7 +1127,7 @@ for j in range(0,75):
 excel_covid_clinical_results(dictionaries_sign_covid,True,"Covid_predictions_clinical_full_n_final_final.xlsx")
 excel_results(dictionaries_sign_covid,"Covid_predictions_full_n_final_final.xlsx")
 
-#-------------------------------------Visualization-------------------------------------------------------
+#-------------------------------------Visualization------------------------------------#heatmap
 
 def sort_based_on_phase_trials(drug_list):
   wb = openpyxl.load_workbook("Covid_clinical_drugs.xlsx").active
