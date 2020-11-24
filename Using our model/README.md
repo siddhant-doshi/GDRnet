@@ -1,4 +1,4 @@
-Demo of how to use our model - "Using_our_model.ipynb". All the pre-loaded variables and files required to run this code can be downloaded from https://ece.iisc.ac.in/~spchepuri/sw/drug_repurpose/
+Demo of how to use Dr-COVID - "Using_our_model.ipynb". All the pre-loaded variables and files required to run this code can be downloaded from https://ece.iisc.ac.in/~spchepuri/sw/drug_repurpose/
 
 A_tilda.p = Adjacency matrix of our graph
 
