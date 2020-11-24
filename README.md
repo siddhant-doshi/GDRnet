@@ -1,7 +1,7 @@
 # Drug_repurposing
 
-We design a generic drug repurposing model and, also explain how we can use it in predicting drugs.
+We design a generic graph neural network (GNN) based drug repurposing model, called Dr-COVID.
 
 Database used - DRKG - https://github.com/gnn4dr/DRKG
 
-Using_our_model - Gives a demo of how we can predict drugs for diseases with our model.
+Using_our_model - Gives a demo of how we can predict drugs for diseases with Dr-COVID.
