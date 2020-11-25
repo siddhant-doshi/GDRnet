@@ -8,6 +8,6 @@ input_features.p = Input feature matrix associated with the graph
 
 nodes_mapping.p = its a dictionary - {node_name:node_id}. node_name is the actual entity name (eg - "Compound::DB01234") and node_id is it's id in the graph.
 
-DR_model = our pre-trained model
+DR_model = our pre-trained model Dr-COVID
 
 Disease_list and Drug_list are complete list of both the entities from our graph.
