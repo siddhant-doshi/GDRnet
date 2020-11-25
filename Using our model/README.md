@@ -4,6 +4,8 @@ Variables --
 
 A_tilda.p = Adjacency matrix of our graph
 
+input_features.p = Input feature matrix associated with the graph
+
 nodes_mapping.p = its a dictionary - {node_name:node_id}. node_name is the actual entity name (eg - "Compound::DB01234") and node_id is it's id in the graph.
 
 DR_model = our pre-trained model
